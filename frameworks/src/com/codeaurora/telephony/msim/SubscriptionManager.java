@@ -124,17 +124,18 @@ public class SubscriptionManager extends Handler {
     private static final int EVENT_CARD_INFO_AVAILABLE = 0;
     private static final int EVENT_CARD_INFO_NOT_AVAILABLE = 1;
     private static final int EVENT_ALL_CARD_INFO_AVAILABLE = 2;
-    private static final int EVENT_SET_UICC_SUBSCRIPTION_DONE = 3;
-    private static final int EVENT_SUBSCRIPTION_STATUS_CHANGED = 4;
-    private static final int EVENT_SET_DATA_SUBSCRIPTION_DONE = 5;
-    private static final int EVENT_CLEANUP_DATA_CONNECTION_DONE = 6;
-    private static final int EVENT_ALL_DATA_DISCONNECTED = 7;
-    private static final int EVENT_RADIO_ON = 8;
-    private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 9;
-    private static final int EVENT_PROCESS_AVAILABLE_CARDS = 10;
-    private static final int EVENT_SET_PRIORITY_SUBSCRIPTION_DONE = 11;
-    private static final int EVENT_SET_DEFAULT_VOICE_SUBSCRIPTION_DONE = 12;
-    private static final int EVENT_SHUTDOWN_ACTION_RECEIVED = 13;
+    private static final int EVENT_SET_SUBSCRIPTION_MODE_DONE = 3;//
+    private static final int EVENT_SET_UICC_SUBSCRIPTION_DONE = 4;
+    private static final int EVENT_SUBSCRIPTION_STATUS_CHANGED = 5;//
+    private static final int EVENT_SET_DATA_SUBSCRIPTION_DONE = 6;//
+    private static final int EVENT_CLEANUP_DATA_CONNECTION_DONE = 7;//
+    private static final int EVENT_ALL_DATA_DISCONNECTED = 9;//
+    private static final int EVENT_RADIO_ON = 10;//
+    private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 11;//
+    private static final int EVENT_PROCESS_AVAILABLE_CARDS = 12;//--
+    private static final int EVENT_SET_PRIORITY_SUBSCRIPTION_DONE = 13;//--
+    private static final int EVENT_SET_DEFAULT_VOICE_SUBSCRIPTION_DONE = 14;//--
+    private static final int EVENT_SHUTDOWN_ACTION_RECEIVED = 15;//--
 
     // Set Subscription Return status
     public static final String SUB_ACTIVATE_SUCCESS = "ACTIVATE SUCCESS";
@@ -347,6 +348,11 @@ public class SubscriptionManager extends Handler {
             case EVENT_ALL_CARD_INFO_AVAILABLE:
                 logd("EVENT_ALL_CARD_INFO_AVAILABLE");
                 processAllCardsInfoAvailable();
+                break;
+
+            case EVENT_SET_SUBSCRIPTION_MODE_DONE:
+                logd("EVENT_SET_SUBSCRIPTION_MODE_DONE");
+                processSetSubscriptionModeDone();
                 break;
 
             case EVENT_SET_UICC_SUBSCRIPTION_DONE:
@@ -996,6 +1002,10 @@ public class SubscriptionManager extends Handler {
         }
     }
 
+    private void processSetSubscriptionModeDone() {
+        startNextPendingActivateRequests();
+    }
+
     /**
      * Handles EVENT_ALL_CARDS_INFO_AVAILABLE.
      */
@@ -1426,6 +1436,19 @@ public class SubscriptionManager extends Handler {
                 logd("startNextPendingActivateRequests: Activating SUB : " + newSub);
                 setUiccSubscription(newSub);
                 // process one request at a time!!
+                //(int sub, SubscriptionStatus status, String appIndexType, int app3gppIndexId,int app3gpp2IndexId, String app3gppStatus, String app3gpp2Status)
+                /*if(newSub.subId>=0){
+                    SubscriptionManager.SetUiccSubsParams setSubParam =
+                        new SetUiccSubsParams(
+                        newSub.subId, newSub.subStatus, newSub.appType,
+                        newSub.gsm_id,
+                        Subscription.cdma_id,
+                        SUB_NOT_CHANGED, SUB_NOT_CHANGED);
+                    Message msgSetUiccSubDone = Message.obtain(this, EVENT_SET_UICC_SUBSCRIPTION_DONE, setSubParam);
+                    mCi[newSub.subId].setUiccSubscription(newSub.slotId, newSub.getAppIndex(), newSub.subId, newSub.subStatus.ordinal(), msgSetUiccSubDone);
+                } else {
+                    mActivatePending.put(sub, null);
+                }*/
                 return true;
             }
         }
